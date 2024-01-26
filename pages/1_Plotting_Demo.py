@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+'''
 import time
 
 import numpy as np
@@ -54,3 +54,4 @@ Streamlit. We're generating a bunch of random numbers in a loop for around
 plotting_demo()
 
 show_code(plotting_demo)
+'''

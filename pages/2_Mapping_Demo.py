@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+'''
 from urllib.error import URLError
 
 import pandas as pd
@@ -115,3 +115,4 @@ to display geospatial data."""
 mapping_demo()
 
 show_code(mapping_demo)
+'''

@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+'''
 from urllib.error import URLError
 
 import altair as alt
@@ -75,3 +75,4 @@ st.write(
 data_frame_demo()
 
 show_code(data_frame_demo)
+'''
