@@ -1,29 +1,93 @@
 import streamlit as st
+import requests
+import openpyxl
+from datetime import datetime
+import pandas as pd
+from st_pages import Page, Section, show_pages, add_page_title
 
-# Streamlit App
-st.set_page_config(page_title='Index Returns' , page_icon=None, layout="wide", initial_sidebar_state="auto", menu_items={"About": 'Text'})
+def fetch_data():
+    url = "https://www.ndtvprofit.com/feapi/markets/historical-returns/all"
+    response = requests.get(url)
 
-st.header('Index Returns Anualised:')
+    if response.status_code == 200:
+        json_data = response.json()
+        annualization_factors = {f"{i}Y": i for i in range(2, 11)}
+        workbook = openpyxl.Workbook()
+        worksheet = workbook.active
+        headers = ["Index", "1M", "3M", "YTD", "1Y", "2Y", "3Y", "4Y", "5Y", "10Y"]
+        worksheet.append(headers)
+        excluded_entries = {"", "-", "NIFTYTR2X", "NIFTYPR2X", "NIFTYTR1X", "NIFTYPR1X"}
 
-st.text("""# Welcome to Index Returns!
+        for entry in json_data['data']:
+            if entry["name"] in excluded_entries:
+                continue
 
-## Empowering Your Investment Decisions with Annualized Index Returns
+            row_data = [entry["name"]]
 
-Providing you with comprehensive insights into index performance. Whether you're a seasoned investor or just getting started, our platform delivers annualized returns at various levels, enabling you to make informed investment decisions.
+            for period in ["1M", "3M", "YTD", "1Y"]:
+                if period in entry["returns"]:
+                    row_data.append(round(entry["returns"][period], 0))
+                else:
+                    row_data.append(None)
 
-### Key Features:
+            for year in ["2Y", "3Y", "4Y", "5Y", "10Y"]:
+                if year in annualization_factors and year in entry["returns"] and entry["returns"][year] != 'NA':
+                    row_data.append(round(float(entry["returns"][year]) / annualization_factors[year], 0))
+                else:
+                    row_data.append(None)
 
-- **Index Returns Overview:** Explore a detailed overview of annualized returns for a wide range of indices.
-  
-- **Performance Metrics:** Gain access to performance metrics that matter, helping you assess the historical performance of key indices.
+            worksheet.append(row_data)
 
-- **Custom Analysis:** Tailor your analysis by specific time frames and indices to match your investment strategy.
+        today_date = datetime.now().strftime("%Y-%m-%d")
+        filename = f'output_annual_ret_{today_date}_M_Y.xlsx'
+        workbook.save(filename)
+        
+        # Streamlit App
+        st.set_page_config(page_title='Index Returns' , page_icon=None, layout="wide", initial_sidebar_state="auto", menu_items={"About": 'Text'})
 
-3. **Stay Informed:** Receive timely updates (EOD) and insights to stay ahead in the dynamic world of finance.
+        st.header('Index Returns Anualised:')
 
-Ready to elevate your investment journey? Dive into the world of annualized index returns 
+        st.write(f"Data has been successfully fetched, processed, and saved to {filename}.")
+            
+        # Optional -- adds the title and icon to the current page
+        #add_page_title()
 
-        For Indepth analysis of Nse Indexes Check out the link Below !
-        (https://allindexanalysis.streamlit.app)        
+        # Specify what pages should be shown in the sidebar, and what their titles and icons
+        # should be
+        show_pages(
+            [
+                Page("Hello.py", "Index Returns"),
+                Page("pages/0_about.py", "About"),
+            ]
+        )
 
-""")
+        # Create a data table from the worksheet
+        data = worksheet.values
+        columns = next(data)
+        df = pd.DataFrame(data, columns=columns)
+
+        # Remove decimals from the dataframe
+        df = df.astype(str).replace('\.0', '', regex=True)
+
+        # Display the data table
+        st.table(df)
+
+        # Add a download button for the file
+        st.download_button("Download Excel File", filename)
+        
+        st.text('''For Indepth analysis of Nse Indexes Check out the link Below !''')
+        st.write("https://allindexanalysis.streamlit.app",unsafe_allow_html=True)
+
+    else:
+        st.write(f"Failed to fetch data. Status code: {response.status_code}")
+        
+        st.text('''For Indepth analysis of Nse Indexes Check out the link Below !''')
+        st.write("https://allindexanalysis.streamlit.app",unsafe_allow_html=True)
+
+# Fetch data when the app starts
+fetch_data()
+
+
+
+
+
