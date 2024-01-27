@@ -70,10 +70,10 @@ def fetch_data():
         df = df.astype(str).replace('\.0', '', regex=True)
 
         # Display the data table
-        st.table(df)
+        st.dataframe(df)
 
         # Add a download button for the file
-        st.download_button("Download Excel File", filename)
+        #st.download_button("Download Excel File", filename)
         
         st.text('''For Indepth analysis of Nse Indexes Check out the link Below !''')
         st.write("https://allindexanalysis.streamlit.app",unsafe_allow_html=True)
