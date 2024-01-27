@@ -47,7 +47,7 @@ def fetch_data():
 
         st.header('Index Returns Anualised:')
 
-        st.write(f"Data has been successfully fetched, processed, and saved to {filename}.")
+        st.write(f"Data has been successfully fetched") #, processed, and saved to {filename}.")
             
         # Optional -- adds the title and icon to the current page
         #add_page_title()
