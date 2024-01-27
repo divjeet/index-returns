@@ -1,51 +1,29 @@
-# Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import streamlit as st
-from streamlit.logger import get_logger
 
-LOGGER = get_logger(__name__)
+# Streamlit App
+st.set_page_config(page_title='Index Returns' , page_icon=None, layout="wide", initial_sidebar_state="auto", menu_items={"About": 'Text'})
 
+st.header('Index Returns Anualised:')
 
-def run():
-    st.set_page_config(
-        page_title="Hello",
-        page_icon="👋",
-    )
+st.text("""# Welcome to Index Returns!
 
-    st.write("# Welcome to Streamlit! 👋")
+## Empowering Your Investment Decisions with Annualized Index Returns
 
-    st.sidebar.success("Select a demo above.")
+Providing you with comprehensive insights into index performance. Whether you're a seasoned investor or just getting started, our platform delivers annualized returns at various levels, enabling you to make informed investment decisions.
 
-    st.markdown(
-        """
-        Streamlit is an open-source app framework built specifically for
-        Machine Learning and Data Science projects.
-        **👈 Select a demo from the sidebar** to see some examples
-        of what Streamlit can do!
-        ### Want to learn more?
-        - Check out [streamlit.io](https://streamlit.io)
-        - Jump into our [documentation](https://docs.streamlit.io)
-        - Ask a question in our [community
-          forums](https://discuss.streamlit.io)
-        ### See more complex demos
-        - Use a neural net to [analyze the Udacity Self-driving Car Image
-          Dataset](https://github.com/streamlit/demo-self-driving)
-        - Explore a [New York City rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
-    """
-    )
+### Key Features:
 
+- **Index Returns Overview:** Explore a detailed overview of annualized returns for a wide range of indices.
+  
+- **Performance Metrics:** Gain access to performance metrics that matter, helping you assess the historical performance of key indices.
 
-if __name__ == "__main__":
-    run()
+- **Custom Analysis:** Tailor your analysis by specific time frames and indices to match your investment strategy.
+
+3. **Stay Informed:** Receive timely updates (EOD) and insights to stay ahead in the dynamic world of finance.
+
+Ready to elevate your investment journey? Dive into the world of annualized index returns 
+
+        For Indepth analysis of Nse Indexes Check out the link Below !
+        (https://allindexanalysis.streamlit.app)        
+
+""")
