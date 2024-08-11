@@ -1,9 +1,14 @@
-altair
-numpy
-pandas
 pydeck
-streamlit
 openpyxl
 requests
 datetime
-st-pages
+altair
+numpy == 1.26.0
+pandas == 2.2.1
+streamlit == 1.31.0
+nsepython
+nselib
+plotly
+plotly_express
+scipy
+st-pages == 0.4.5
