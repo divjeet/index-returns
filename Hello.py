@@ -5,89 +5,95 @@ from datetime import datetime
 import pandas as pd
 from st_pages import Page, Section, show_pages, add_page_title
 
+# Streamlit App Configuration
+st.set_page_config(page_title='Index Returns', layout="wide", initial_sidebar_state="auto", 
+                   menu_items={"About": 'Text'})
+
 def fetch_data():
     url = "https://www.ndtvprofit.com/feapi/markets/historical-returns/all"
-    response = requests.get(url)
+    try:
+        response = requests.get(url)
 
-    if response.status_code == 200:
-        json_data = response.json()
-        annualization_factors = {f"{i}Y": i for i in range(2, 11)}
-        workbook = openpyxl.Workbook()
-        worksheet = workbook.active
-        headers = ["Index", "1M", "3M", "YTD", "1Y", "2Y", "3Y", "4Y", "5Y", "10Y"]
-        worksheet.append(headers)
-        excluded_entries = {"", "-", "NIFTYTR2X", "NIFTYPR2X", "NIFTYTR1X", "NIFTYPR1X"}
+        if response.status_code == 200:
+            json_data = response.json()
+            annualization_factors = {f"{i}Y": i for i in range(2, 11)}
+            workbook = openpyxl.Workbook()
+            worksheet = workbook.active
+            headers = ["Index", "1M", "3M", "YTD", "1Y", "2Y", "3Y", "4Y", "5Y", "10Y"]
+            worksheet.append(headers)
+            excluded_entries = {"", "-", "NIFTYTR2X", "NIFTYPR2X", "NIFTYTR1X", "NIFTYPR1X"}
 
-        for entry in json_data['data']:
-            if entry["name"] in excluded_entries:
-                continue
+            for entry in json_data['data']:
+                if entry["name"] in excluded_entries:
+                    continue
 
-            row_data = [entry["name"]]
+                row_data = [entry["name"]]
 
-            for period in ["1M", "3M", "YTD", "1Y"]:
-                if period in entry["returns"]:
-                    row_data.append(round(entry["returns"][period], 0))
-                else:
-                    row_data.append(None)
+                for period in ["1M", "3M", "YTD", "1Y"]:
+                    if period in entry["returns"]:
+                        row_data.append(round(entry["returns"][period], 0))
+                    else:
+                        row_data.append(None)
 
-            for year in ["2Y", "3Y", "4Y", "5Y", "10Y"]:
-                if year in annualization_factors and year in entry["returns"] and entry["returns"][year] != 'NA':
-                    row_data.append(round(float(entry["returns"][year]) / annualization_factors[year], 0))
-                else:
-                    row_data.append(None)
+                for year in ["2Y", "3Y", "4Y", "5Y", "10Y"]:
+                    if year in annualization_factors and year in entry["returns"] and entry["returns"][year] != 'NA':
+                        row_data.append(round(float(entry["returns"][year]) / annualization_factors[year], 0))
+                    else:
+                        row_data.append(None)
 
-            worksheet.append(row_data)
+                worksheet.append(row_data)
 
-        today_date = datetime.now().strftime("%Y-%m-%d")
-        filename = f'output_annual_ret_{today_date}_M_Y.xlsx'
-        workbook.save(filename)
-        
-        # Streamlit App
-        st.set_page_config(page_title='Index Returns' , page_icon=None, layout="wide", initial_sidebar_state="auto", menu_items={"About": 'Text'})
+            today_date = datetime.now().strftime("%Y-%m-%d")
+            filename = f'output_annual_ret_{today_date}_M_Y.xlsx'
+            workbook.save(filename)
 
-        st.header('Index Returns Anualised:')
+            st.header('Index Returns Annualized:')
+            st.write("Data has been successfully fetched and processed.")
 
-        st.write(f"Data has been successfully fetched") #, processed, and saved to {filename}.")
-            
-        # Optional -- adds the title and icon to the current page
-        #add_page_title()
+            # Show sidebar pages
+            show_pages(
+                [
+                    Page("Hello.py", "Index Returns"),
+                    Page("pages/0_about.py", "About"),
+                ]
+            )
 
-        # Specify what pages should be shown in the sidebar, and what their titles and icons
-        # should be
-        show_pages(
-            [
-                Page("Hello.py", "Index Returns"),
-                Page("pages/0_about.py", "About"),
-            ]
-        )
+            # Create a data table from the worksheet
+            data = worksheet.values
+            columns = next(data)
+            df = pd.DataFrame(data, columns=columns)
 
-        # Create a data table from the worksheet
-        data = worksheet.values
-        columns = next(data)
-        df = pd.DataFrame(data, columns=columns)
+            # Remove decimals from the dataframe and convert numeric columns
+            df.iloc[:, 1:] = df.iloc[:, 1:].apply(pd.to_numeric, errors='coerce')
+            df = df.astype(str).replace('\.0', '', regex=True)
 
-        # Remove decimals from the dataframe
-        df = df.astype(str).replace('\.0', '', regex=True)
+            # Sort the DataFrame by numeric columns
+            sort_columns = ["1M", "3M", "YTD", "1Y", "2Y", "3Y", "4Y", "5Y", "10Y"]
+            for col in sort_columns:
+                if col in df.columns:
+                    df[col] = pd.to_numeric(df[col], errors='coerce')  # Ensure sorting works correctly
+            df.sort_values(by=sort_columns, ascending=True, inplace=True)
 
-        # Display the data table
-        st.dataframe(df)
+            # Display the data table
+            st.dataframe(df)
 
-        # Add a download button for the file
-        #st.download_button("Download Excel File", filename)
-        
-        st.text('''For Indepth analysis of Nse Indexes Check out the link Below !''')
-        st.write("https://allindexanalysis.streamlit.app",unsafe_allow_html=True)
+            # Add a download button for the file
+            with open(filename, "rb") as f:
+                st.download_button("Download Excel File", f, file_name=filename, mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-    else:
-        st.write(f"Failed to fetch data. Status code: {response.status_code}")
-        
-        st.text('''For Indepth analysis of Nse Indexes Check out the link Below !''')
-        st.write("https://allindexanalysis.streamlit.app",unsafe_allow_html=True)
+            st.text('''For in-depth analysis of NSE Indexes, check out the link below!''')
+            st.write("[NSE Index Analysis](https://allindexanalysis.streamlit.app)", unsafe_allow_html=True)
+
+        else:
+            st.error(f"Failed to fetch data. Status code: {response.status_code}")
+            st.text('''For in-depth analysis of NSE Indexes, check out the link below!''')
+            st.write("[NSE Index Analysis](https://allindexanalysis.streamlit.app)", unsafe_allow_html=True)
+
+    except Exception as e:
+        st.error(f"An error occurred: {str(e)}")
+        st.text('''For in-depth analysis of NSE Indexes, check out the link below!''')
+        st.write("[NSE Index Analysis](https://allindexanalysis.streamlit.app)", unsafe_allow_html=True)
 
 # Fetch data when the app starts
-fetch_data()
-
-
-
-
-
+with st.spinner("Fetching data..."):
+    fetch_data()
