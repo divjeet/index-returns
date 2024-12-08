@@ -5,7 +5,7 @@ datetime
 altair
 numpy == 1.26.0
 pandas == 2.2.1
-streamlit == 1.31.0
+streamlit == 1.37.0
 nsepython
 nselib
 plotly
